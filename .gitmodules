@@ -1,0 +1,3 @@
+[submodule "crafter/lib/forge-std"]
+	path = crafter/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
