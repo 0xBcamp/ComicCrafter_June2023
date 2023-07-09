@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { create as ipfsHttpClient } from "ipfs-http-client";
-
+import Btn from "./Btn";
+import ProviderContext from "@/store/ProviderContext";
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 const projectSecretKey = process.env.NEXT_PUBLIC_PROJECT_KEY;
 const auth = `Basic ${btoa(`${projectId}:${projectSecretKey}`)}`;
@@ -17,6 +18,7 @@ const ipfs = ipfsHttpClient({
 
 const ImageUploadForm = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { provider, setProvider } = useContext(ProviderContext);
 
   // Event handler for form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -60,13 +62,7 @@ const ImageUploadForm = () => {
             onChange={handleFileChange}
           />
         </div>
-
-        <button
-          type="submit"
-          className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Upload
-        </button>
+        <Btn type="submit" text="Upload" disabled={!provider} />
       </form>
     </div>
   );
