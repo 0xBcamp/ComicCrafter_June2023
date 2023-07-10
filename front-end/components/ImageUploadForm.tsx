@@ -5,10 +5,11 @@ import Btn from "./Btn";
 import ProviderContext from "@/store/ProviderContext";
 import { ethers } from "ethers";
 import Loader from "./Loader";
+import ComicLaunchPad from "../assets/ComicLaunchPad.json";
+
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 const projectSecretKey = process.env.NEXT_PUBLIC_PROJECT_KEY;
 const auth = `Basic ${btoa(`${projectId}:${projectSecretKey}`)}`;
-
 const ipfs = ipfsHttpClient({
   host: "ipfs.infura.io",
   port: 5001,
@@ -41,22 +42,31 @@ const ImageUploadForm = () => {
     }
     try {
       setIsLoading(true);
-      // upload files
+
       setLoadingText("Uploading image...");
+
       const result = await ipfs.add(selectedFile);
       const cid = result.cid.toString();
-      const url = `https://ipfs.io/ipfs/${cid}`;
-
-      console.log("Image uploaded to ipfs", url);
+      const uri = `https://ipfs.io/ipfs/${cid}`;
+      console.log("Image uploaded to ipfs", uri);
 
       setLoadingText("Minting NFT...");
+
+      const signer = await (provider as any).getSigner();
+      const address = await signer.getAddress();
+      console.log("Address", address);
+
       const connectedContract = new ethers.Contract(
         CONTRACT_ADDRESS,
-        [],
-        (provider as any).getSigner()
+        ComicLaunchPad.abi,
+        signer
       );
 
-      // Process and upload image file...
+      const nftTxn = await connectedContract.mint(address, uri);
+      console.log("nftTxn", nftTxn);
+
+      const res = await nftTxn.wait();
+      console.log("res", res);
     } finally {
       setIsLoading(false);
     }
